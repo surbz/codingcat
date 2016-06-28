@@ -1,0 +1,211 @@
+<?php
+
+function custom_ajax_menu() {
+  $items = array();
+  $items['custom_ajax/form'] = array(
+    'title' => t('My form'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('custom_ajax_form'),
+    'access arguments' => array('access content'),
+    'description' => t('My form'),
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+/**
+ * Returns the render array for the form.
+ */
+function custom_ajax_form($form, &$form_state) {
+  $form = array();
+
+  //checkbox loading textfields starts here
+
+
+  $form['annotate_deletion'] = array(
+'#type' => 'radios',
+'#title' => t('Annotations will be deleted'),
+'#description' => t('Select a method for deleting annotations.'),
+//'#required' => TRUE,
+'#options' => array(
+t('Never'),
+t('Randomly'),
+t('After 30 days'),
+),
+'#ajax' => array(
+      'callback' => 'ajax_example_autocheckboxes_radios',
+      'wrapper' => 'textfields',
+      'effect' => 'fade',
+    )
+);
+
+
+
+$form['annotate_deletion']['#states']['required'] = array(
+  ':input[name="field_required[und]"]' => array('value' => 1)
+);
+
+
+  $form['ask_first_name'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Example 1:Ask me my first name'),
+    '#ajax' => array(
+      'callback' => 'ajax_example_autotextfields_callback',
+      'wrapper' => 'textfields',
+      'effect' => 'fade',
+    )
+  );
+
+  $form['ask_last_name'] = array(
+   '#type' => 'checkbox',
+   '#title' => t('Ask me my last name'),
+    '#ajax' => array(
+      'callback' => 'ajax_example_autotextfields_callback',
+      'wrapper' => 'textfields',
+      'effect' => 'fade',
+
+    ),
+  );
+
+  $form['textfields'] = array(
+    '#title' => t("Generated text fields for first and last name"),
+    '#prefix' => '<div id="textfields">',
+    '#suffix' => '</div>',
+    '#type' => 'fieldset',
+    '#description' => t('This is where we put automatically generated textfields'),
+  );
+
+   if (!empty($form_state['values']['ask_first_name']) && $form_state['values']['ask_first_name']) {
+    $form['textfields']['first_name'] = array(
+      '#type' => 'textfield',
+      '#title' => t('First Name'),
+    );
+  }
+  if (!empty($form_state['values']['ask_last_name']) && $form_state['values']['ask_last_name']) {
+    $form['textfields']['last_name'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Last Name'),
+    );
+  }
+
+  //checkbox loading textfields ends here
+
+  //showing the number of checxboxes selected from select list starts
+
+  $default = !empty($form_state['values']['howmany']) ? $form_state['values']['howmany'] : 1;
+
+  $form['howmany_select'] = array(
+    '#title' => t('Example 2 :How many checkboxes do you want?'),
+    '#type' => 'select',
+    '#options' => array(1 => 1, 2 => 2, 3 => 3, 4 => 4),
+    '#default_value' => $default,
+    '#ajax' => array(
+      'callback' => 'ajax_example_autocheckboxes_callback',
+      'wrapper' => 'checkboxes-div',
+      'method' => 'replace',
+      'effect' => 'fade',
+    ),
+
+  );
+
+
+  $form['checkboxes_fieldset'] = array(
+    '#title' => t("Generated Checkboxes"),
+    // The prefix/suffix provide the div that we're replacing, named by
+    // #ajax['wrapper'] above.
+    '#prefix' => '<div id="checkboxes-div">',
+    '#suffix' => '</div>',
+    '#type' => 'fieldset',
+    '#description' => t('This is where we get automatically generated checkboxes'),
+  );
+
+
+ $form['radios_fieldset'] = array(
+    '#title' => t("Generated Checkboxes"),
+    // The prefix/suffix provide the div that we're replacing, named by
+    // #ajax['wrapper'] above.
+    #'#required' => TRUE,
+    '#prefix' => '<div id="radios-div">',
+    '#suffix' => '</div>',
+    '#type' => 'radios',
+    '#description' => t('This is where we get automatically generated checkboxes'),
+    '#options' => array(
+t('Never1'),
+t('Randomly1'),
+t('After 30 days1'),
+),
+  );
+
+
+
+  $num_checkboxes = !empty($form_state['values']['howmany_select']) ? $form_state['values']['howmany_select'] : 1;
+  for ($i=1; $i<=$num_checkboxes; $i++) {
+    $form['checkboxes_fieldset']["checkbox$i"] = array(
+      '#type' => 'checkbox',
+      '#title' => "Checkbox $i",
+    );
+  }
+
+  //showing the number of checxboxes selected from select list ends
+
+  //realce
+
+    $form['changethis'] = array(
+    '#title' => t("Example 3:Choose something and explain why"),
+    '#type' => 'select',
+    '#options' => array(
+      'one' => 'one',
+      'two' => 'two',
+      'three' => 'three',
+    ),
+    '#ajax' => array(
+      'callback' => 'ajax_example_simplest_callback',
+      'wrapper' => 'replace_textfield_div',
+     ),
+  );
+
+  // This entire form element will be replaced with an updated value.
+  // However, it has to have the prefix/suffix to work right, as the entire
+  // div is replaced.
+  // In this example, the description is dynamically updated during form
+  // rebuild.
+
+  $form['replace_textfield'] = array(
+    '#type' => 'textfield',
+    '#title' => t("Why"),
+    '#prefix' => '<div id="replace_textfield_div">',
+    '#suffix' => '</div>',
+  );
+
+  if (!empty($form_state['values']['changethis'])) {
+    $form['replace_textfield']['#description'] = t("Say why you chose") .  " '{$form_state['values']['changethis']}'";
+  }
+  //replace
+
+  /*Ajax form no need for submit button*/
+  /*$form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Click Me'),
+  );
+*/
+
+  return $form;
+}
+
+function ajax_example_autotextfields_callback($form, $form_state) {
+  return $form['textfields'];
+}
+
+function ajax_example_autocheckboxes_callback($form, $form_state) {
+  return $form['checkboxes_fieldset'];
+}
+
+function ajax_example_autocheckboxes_radios($form, $form_state) {
+  return $form['radios_fieldset'];
+}
+
+function ajax_example_simplest_callback($form, $form_state) {
+  // The form has already been submitted and updated. We can return the replaced
+  // item as it is.
+  return $form['replace_textfield'];
+}

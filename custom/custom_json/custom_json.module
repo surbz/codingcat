@@ -1,0 +1,50 @@
+<?php
+/*
+Implements hook_menu
+*/
+function custom_json_menu() {
+  $items = array();
+  
+  $items['custom_json/return'] = array(
+    'title' => t('Return Json'),
+    'page callback' => 'return_data',
+    #'page arguments' => array('custom_ajax_form'),
+    'access arguments' => array('access content'),
+    #'description' => t('JSON Returned'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['custom_json/read'] = array(
+    'title' => t('read Json'),
+    'page callback' => 'read_data',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/*
+used to output JSON data after reading from db
+*/
+function return_data(){
+  
+  $data = db_query("SELECT nid,title FROM {node} LIMIT 5")->fetchAll();
+  drupal_json_output($data);
+  drupal_exit();
+}
+
+function read_data(){
+    $url = "http://local.drupal/custom_json/return";
+    
+    $request = drupal_http_request($url);
+    $json_response = drupal_json_decode($request->data);
+    
+    echo "<pre>";print_r($json_response);die;
+
+    foreach ($json_response as $response_data) {
+      //your operation code  
+    }
+
+    drupal_exit();
+}

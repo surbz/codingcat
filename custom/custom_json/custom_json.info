@@ -1,0 +1,3 @@
+core = "7.x"
+description = "Read Json"
+name = "Custom Json"

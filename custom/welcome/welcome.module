@@ -1,0 +1,258 @@
+<?php
+
+function welcome_menu() {
+  $items = array();
+  $items['welcome/form'] = array(
+    'title' => t('My form'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('welcome_my_form'),
+    'access arguments' => array('access content'),
+    'description' => t('My form'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['check_issue/form'] = array(
+    'title' => t('My form'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('welcome_check_issue_form'),
+    'access arguments' => array('access content'),
+    'description' => t('My form'),
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+/**
+ * Returns the render array for the form.
+ */
+function welcome_my_form($form, &$form_state) {
+
+$dummy = array(
+  'items' => array(
+    array('term' => 'Term 1', 'desc' => 'Definition 1'),
+    array('term' => 'Term 2', 'desc' => 'Definition 2'),
+  ),
+  'title' => 'This is the title for my definition list',
+);
+print theme('definition_list', $dummy);
+
+// $foo = array(
+//     '#theme' => 'foo',
+//     '#bar' => $dummy,
+//   );
+//   return drupal_render($foo);
+
+	global $user;
+
+	$form['#attached']['css'] = array(
+		drupal_get_path('module', 'welcome') . '/css/welcome.css',
+	);
+
+	$form['#attached']['js'] = array(
+		drupal_get_path('module', 'welcome') . '/js/welcome.js',
+	);
+
+  $form['name'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Name'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+  );
+  $form['name']['first'] = array(
+    '#type' => 'textfield',
+    '#title' => t('First name'),
+    '#required' => TRUE,
+    '#default_value' => "First name",
+    '#description' => "Please enter your first name.",
+    '#size' => 20,
+    '#maxlength' => 20,
+    '#disabled' => TRUE,
+
+  );
+  $form['name']['last'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Last name'),
+    '#required' => TRUE,
+    #'#delta' => 10,
+
+    #'#markup'=> 'HTML',
+  );
+
+  $form['year_of_birth'] = array(
+    '#type' => 'textfield',
+    '#title' => "Year of birth",
+    '#description' => 'Format is "YYYY"',
+  );
+
+  $form['gender'] = array(
+    '#type' => 'radios',
+    '#title' => "Gender",
+    '#description' => 'Please select"',
+    '#options' => array(
+	1 => t('Male'),
+	2 => t('Female'),
+    	),
+   '#deafult_value' => t('Male'),
+  );
+
+  $form['likes'] = array(
+    '#type' => 'checkboxes',
+
+    '#title' => "what do you like",
+
+    '#description' => 'Please check',
+
+    '#options' => array(
+	1 => t('Soda'),
+	2 => t('Icecreams'),
+	3 => t('Lassi'),
+	4 => t('Fish'),
+	5 => t('Chips'),
+    	),
+   # '#deafult_value' => array('Soda','Chips'),
+  );
+
+  $form['list'] = array(
+    '#type' => 'select',
+
+    '#title' => "what do you like",
+
+    '#description' => 'Please check',
+
+    '#options' => array(
+	1 => t('Soda'),
+	2 => t('Icecreams'),
+	3 => t('Lassi'),
+	4 => t('Fish'),
+	5 => t('Chips'),
+    	),
+    '#multiple' => TRUE,
+   #'#deafult_value' => array('Chips'),
+
+
+  );
+
+
+$form['vertical_tabs'] = array(
+    '#type' => 'vertical_tabs',
+    '#default_tab' => 'edit-tab2', #id of the tab
+   );
+  $form['tab1'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Tab 1'),
+    '#collapsible' => TRUE,
+    '#group' => 'vertical_tabs',
+  );
+  $form['tab1']['field1'] = array(
+    '#title' => t('Field 1'),
+    '#type' => 'textfield',
+  );
+  $form['tab2'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Tab 2'),
+    '#collapsible' => TRUE,
+    '#group' => 'vertical_tabs',
+  );
+  $form['tab2']['field2'] = array(
+    '#title' => t('Field 2'),
+    '#type' => 'textfield',
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Submit',
+  );
+  /*
+  alternative form of using validate and submit functions
+  $form['save'] = array(
+      '#type' => 'submit',
+      '#value' =>  'Save',
+      '#submit' =>  array('security_settings_form_submit'),
+      '#validate' =>  array('security_settings_form_validate'),
+  );
+  */
+  return $form;
+}
+
+/**
+ * Returns the render array for the form.
+ */
+function welcome_check_issue_form($form, &$form_state) {
+
+  $form['gender'] = array(
+    '#type' => 'radios',
+    '#title' => "Gender",
+    '#description' => 'Please select"',
+    '#options' => array(
+  1 => t('Male'),
+  2 => t('Female'),
+      ),
+      '#states' => array(
+      'required' => array(
+         'input[name="gender"]' => array('checked' => TRUE),
+      )
+    ),
+   #'#deafult_value' => 1,
+  );
+
+
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Submit',
+  );
+  /*
+  alternative form of using validate and submit functions
+  $form['save'] = array(
+      '#type' => 'submit',
+      '#value' =>  'Save',
+      '#submit' =>  array('security_settings_form_submit'),
+      '#validate' =>  array('security_settings_form_validate'),
+  );
+  */
+  return $form;
+}
+
+
+/**
+ * Validates the form.
+ */
+function welcome_my_form_validate($form, &$form_state) {
+	$year_of_birth = $form_state['values']['year_of_birth'];
+	if ($year_of_birth && ($year_of_birth < 1900 || $year_of_birth > 2000)) {
+		form_set_error('year_of_birth', 'Enter a year between 1900 and 2000.');
+	}
+}
+
+
+/**
+ * Validates the form.
+ */
+function welcome_check_issue_form_validate($form, &$form_state){
+
+}
+
+/**
+ * Add a submit handler/function to the form.
+ *
+ * This will add a completion message to the screen when the
+ * form successfully processes
+ */
+function welcome_my_form_submit($form, &$form_state) {
+	//drupal_set_message(t('The form has been submitted.'));
+
+	global $user;
+	// Here u can insert Your custom form values into your custom table.
+	db_insert('welcome_settings')
+	->fields(array(
+	  'uid' => $user->uid,
+	  'passwd' => $form_state['values']['name']['last'],
+	))->execute();
+	drupal_set_message("successfully saved Security Settings");
+}
+
+
+ function welcome_user_login(&$edit, $account) {
+      $message = variable_get('welcome_message', 'welcome');
+      drupal_set_message(check_plain(t($message)));
+    }
